@@ -1,10 +1,14 @@
 import React from "react";
-import HomeHero from "../components/home/Hero";
+import BlogIntro from "../components/blogs/BlogIntro";
+import BlogList from "../components/blogs/BlogList";
 
 const Home = () => {
   return (
     <div>
-      <HomeHero />
+      <div>
+        <BlogIntro />
+        <BlogList />
+      </div>
     </div>
   );
 };

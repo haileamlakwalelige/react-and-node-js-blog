@@ -9,18 +9,21 @@ import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 
 const App = () => {
+  const isLogin = window.location.pathname === "/login";
   return (
-    <div>
+    <div className="dotted-background">
       <BrowserRouter>
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/write" element={<Write />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/posts/{id}" element={<Single />} />
-        </Routes>
-        <Footer />
+        {!isLogin && <Navbar />}
+        <div className="pt-40">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/write" element={<Write />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/posts/:id" element={<Single />} />
+          </Routes>
+        </div>
+        {!isLogin && <Footer />}
       </BrowserRouter>
     </div>
   );

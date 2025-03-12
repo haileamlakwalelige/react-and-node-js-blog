@@ -5,36 +5,36 @@ const Footer = () => {
   const currentYear = new Date().getFullYear(); // Get the current year
 
   return (
-    <footer className="bg-white py-12 mt-20 shadow-xl border-t-[1px] border-gray-600">
+    <footer className="text-white py-12 mt-20 shadow-xl border-t-[1px] border-gray-600">
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-center">
           {/* Footer Links */}
           <div className="text-center md:text-left mb-8 md:mb-0">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl font-bold text-white mb-4">
               Haileopia Blog
             </h2>
             <div className="flex justify-center md:justify-start space-x-6">
               <Link
                 to="/"
-                className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+                className="text-white hover:text-indigo-600 transition-all duration-300"
               >
                 Home
               </Link>
               <Link
                 to="/about"
-                className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+                className="text-white hover:text-indigo-600 transition-all duration-300"
               >
                 About
               </Link>
               <Link
                 to="/contact"
-                className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+                className="text-white hover:text-indigo-600 transition-all duration-300"
               >
                 Contact
               </Link>
               <Link
                 to="/privacy"
-                className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+                className="text-white hover:text-indigo-600 transition-all duration-300"
               >
                 Privacy
               </Link>
@@ -47,7 +47,7 @@ const Footer = () => {
               href="https://twitter.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+              className="text-white hover:text-indigo-600 transition-all duration-300"
             >
               <FaTwitter size={24} />
             </a>
@@ -55,7 +55,7 @@ const Footer = () => {
               href="https://facebook.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+              className="text-white hover:text-indigo-600 transition-all duration-300"
             >
               <FaFacebookF size={24} />
             </a>
@@ -63,7 +63,7 @@ const Footer = () => {
               href="https://instagram.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+              className="text-white hover:text-indigo-600 transition-all duration-300"
             >
               <FaInstagram size={24} />
             </a>
@@ -71,7 +71,7 @@ const Footer = () => {
               href="https://github.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-gray-700 hover:text-indigo-600 transition-all duration-300"
+              className="text-white hover:text-indigo-600 transition-all duration-300"
             >
               <FaGithub size={24} />
             </a>
