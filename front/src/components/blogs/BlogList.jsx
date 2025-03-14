@@ -84,7 +84,7 @@ const BlogList = () => {
             <p className="text-start px-2 line-clamp-3">{item.description}</p>
             <div className="flex justify-end items-end">
               <Link to={`/posts/${item.id}`}>
-                <button className="hover:text-blue-500 underline cursor-pointer">
+                <button className="hover:text-blue-500 underline cursor-pointer mr-2">
                   Read More
                 </button>
               </Link>
