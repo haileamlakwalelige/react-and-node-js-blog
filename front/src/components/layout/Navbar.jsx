@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import haileopia from "../../assets/profile.png";
+import Cookies from "js-cookie";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +16,8 @@ const Navbar = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const isLoggedIn = Cookies.get("isLoggedIn");
 
   return (
     <nav
@@ -62,16 +65,21 @@ const Navbar = () => {
               </Link>
             </li>
           ))}
-          <Link to="/login">
-            <button className="bg-green-500 cursor-pointer hover:text-blue-600 hover:underline text-white font-semibold px-8 py-2 rounded-2xl">
-              Login
-            </button>
-          </Link>
-          <Link to="/write">
-            <button className="bg-green-500 cursor-pointer hover:text-blue-600 hover:underline text-white font-semibold px-8 py-2 rounded-2xl">
-              Write
-            </button>
-          </Link>
+          {!isLoggedIn && (
+            <Link to="/login">
+              <button className="bg-green-500 cursor-pointer hover:text-blue-600 hover:underline text-white font-semibold px-8 py-2 rounded-2xl">
+                Login
+              </button>
+            </Link>
+          )}
+
+          {isLoggedIn && (
+            <Link to="/write">
+              <button className="bg-green-500 cursor-pointer hover:text-blue-600 hover:underline text-white font-semibold px-8 py-2 rounded-2xl">
+                Write
+              </button>
+            </Link>
+          )}
         </ul>
       </div>
     </nav>
