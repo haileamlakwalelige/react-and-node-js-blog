@@ -1,16 +1,25 @@
 // src/Login.js
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import api from "../api/api";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 
 const schema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
+const loginUser = async (credentials) => {
+  const response = await api.post("/login", credentials);
+  return response.data;
+};
+
 const Login = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -19,14 +28,24 @@ const Login = () => {
     resolver: zodResolver(schema),
   });
 
+  const navigate = useNavigate();
+
+  const { mutate, isLoading, error } = useMutation({
+    mutationFn: loginUser,
+    onSuccess: (data) => {
+      toast.success("Login successful");
+      Cookies.set("isLoggedIn", "true", { expires: 7 });
+      Cookies.set("auth_token", data.token, { expires: 7 });
+      navigate("/");
+    },
+    onError: (error) => {
+      console.error("Login failed:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Login failed. Try again!");
+    },
+  });
+
   const onSubmit = (data) => {
-    setIsSubmitting(true);
-    console.log(data);
-    // Simulate a network request
-    setTimeout(() => {
-      setIsSubmitting(false);
-      // Handle login logic here
-    }, 2000);
+    mutate(data);
   };
 
   return (
@@ -34,12 +53,18 @@ const Login = () => {
       <form
         onSubmit={handleSubmit(onSubmit)}
         className={`bg-white p-8 rounded-lg shadow-lg w-96 transition-transform transform ${
-          isSubmitting ? "scale-95" : ""
+          isLoading ? "scale-95" : ""
         }`}
       >
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
           Welcome Back!
         </h2>
+
+        {error && (
+          <p className="text-red-500 text-center mb-4 font-bold text-sm">
+            {error.response?.data?.message || "Login failed. Try again!"}
+          </p>
+        )}
 
         <div className="mb-4">
           <label
@@ -83,12 +108,12 @@ const Login = () => {
 
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isLoading}
           className={`w-full bg-blue-600 text-white py-2 cursor-pointer rounded-lg hover:bg-blue-700 transition duration-200 ${
-            isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          {isSubmitting ? "Logging in..." : "Login"}
+          {isLoading ? "Logging in..." : "Login"}
         </button>
       </form>
     </div>
