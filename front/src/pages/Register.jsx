@@ -1,18 +1,19 @@
-// src/Login.js
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import api from "../api/api";
+import toast, { Toaster } from "react-hot-toast";
 
+// Zod Schema for Validation
 const schema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters long"),
+  name: z.string().min(3, "Username must be at least 3 characters long"),
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
 });
 
 const Register = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     register,
     handleSubmit,
@@ -21,96 +22,91 @@ const Register = () => {
     resolver: zodResolver(schema),
   });
 
+  // React Query Mutation for API request
+  const mutation = useMutation({
+    mutationFn: async (userData) => {
+      const response = await api.post("/register", userData);
+      return response.data;
+    },
+    onSuccess: () => {
+      toast.success("Registration successful!");
+    },
+    onError: (error) => {
+      toast.error(error.response?.data || "Registration failed!");
+    },
+  });
+
   const onSubmit = (data) => {
-    setIsSubmitting(true);
-    console.log(data);
-    // Simulate a network request
-    setTimeout(() => {
-      setIsSubmitting(false);
-      // Handle login logic here
-    }, 2000);
+    mutation.mutate(data);
   };
 
   return (
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-blue-500 to-teal-500">
+      <Toaster />
       <form
         onSubmit={handleSubmit(onSubmit)}
         className={`bg-white p-8 rounded-lg shadow-lg w-96 transition-transform transform ${
-          isSubmitting ? "scale-95" : ""
+          mutation.isLoading ? "scale-95" : ""
         }`}
       >
         <h2 className="text-3xl font-bold mb-6 text-center text-gray-800">
           Welcome To Our Blog!
         </h2>
 
+        {/* Name Input */}
         <div className="mb-4">
-          <label
-            className="block text-sm font-semibold mb-2 text-gray-700"
-            htmlFor="username"
-          >
-            Username
+          <label className="block text-sm font-semibold mb-2 text-gray-700">
+            Name
           </label>
           <input
             type="text"
-            id="username"
-            {...register("username")}
-            className={`w-full p-3 border ${
-              errors.username ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            {...register("name")}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
-          {errors.username && (
-            <p className="text-red-500 text-xs">{errors.username.message}</p>
+          {errors.name && (
+            <p className="text-red-500 text-sm">{errors.name.message}</p>
           )}
         </div>
 
+        {/* Email Input */}
         <div className="mb-4">
-          <label
-            className="block text-sm font-semibold mb-2 text-gray-700"
-            htmlFor="email"
-          >
+          <label className="block text-sm font-semibold mb-2 text-gray-700">
             Email
           </label>
           <input
             type="email"
-            id="email"
             {...register("email")}
-            className={`w-full p-3 border ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.email && (
-            <p className="text-red-500 text-xs">{errors.email.message}</p>
+            <p className="text-red-500 text-sm">{errors.email.message}</p>
           )}
         </div>
 
+        {/* Password Input */}
         <div className="mb-4">
-          <label
-            className="block text-sm font-semibold mb-2 text-gray-700"
-            htmlFor="password"
-          >
+          <label className="block text-sm font-semibold mb-2 text-gray-700">
             Password
           </label>
           <input
             type="password"
-            id="password"
             {...register("password")}
-            className={`w-full p-3 border ${
-              errors.password ? "border-red-500" : "border-gray-300"
-            } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           {errors.password && (
-            <p className="text-red-500 text-xs">{errors.password.message}</p>
+            <p className="text-red-500 text-sm">{errors.password.message}</p>
           )}
         </div>
 
+        {/* Submit Button */}
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={mutation.isLoading}
           className={`w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition duration-200 ${
-            isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            mutation.isLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         >
-          {isSubmitting ? "Logging in..." : "Login"}
+          {mutation.isLoading ? "Registering..." : "Register"}
         </button>
       </form>
     </div>
