@@ -1,0 +1,1 @@
+export const SECRET_KEY = "this is haileopia's blog app!"
