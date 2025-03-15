@@ -51,7 +51,7 @@ const AppLayout = () => {
             path="/login"
             element={isLoggedIn ? <Navigate to="/" replace /> : <Login />}
           />
-          <Route path="/register" element={<Register />} />
+          {/* <Route path="/register" element={<Register />} /> */}
           <Route path="/posts/:id" element={<Single />} />
           <Route path="/post/edit/:id" element={<Edit />} />
           <Route path="/technology" element={<Technologies />} />
@@ -59,6 +59,7 @@ const AppLayout = () => {
           <Route path="/productivity" element={<Productivity />} />
           <Route path="/creativity" element={<Creativity />} />
           <Route path="/growth" element={<Growth />} />
+          <Route path="*" element={<Home />} />
         </Routes>
       </div>
       <div className={`${isLogin ? "hidden" : "flex"}`}>

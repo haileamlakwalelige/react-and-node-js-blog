@@ -57,32 +57,32 @@ const upload = multer({
 
 
 // user sections
-app.post("/api/register", async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
+// app.post("/api/register", async (req, res) => {
+//   try {
+//     const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: "All fields are required" });
-    }
+//     if (!name || !email || !password) {
+//       return res.status(400).json({ error: "All fields are required" });
+//     }
 
-    // Hash the password before storing it
-    const hashedPassword = await bcrypt.hash(password, 10);
+//     // Hash the password before storing it
+//     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const q = "INSERT INTO users (`name`, `email`, `password`) VALUES (?, ?, ?)";
-    const values = [name, email, hashedPassword];
+//     const q = "INSERT INTO users (`name`, `email`, `password`) VALUES (?, ?, ?)";
+//     const values = [name, email, hashedPassword];
 
-    db.query(q, values, (err, data) => {
-      if (err) {
-        console.error("Database Error:", err.message);
-        return res.status(500).json({ error: "Database error" });
-      }
-      res.status(201).json({ message: "User registered successfully", userId: data.insertId });
-    });
-  } catch (error) {
-    console.error("Server Error:", error.message);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+//     db.query(q, values, (err, data) => {
+//       if (err) {
+//         console.error("Database Error:", err.message);
+//         return res.status(500).json({ error: "Database error" });
+//       }
+//       res.status(201).json({ message: "User registered successfully", userId: data.insertId });
+//     });
+//   } catch (error) {
+//     console.error("Server Error:", error.message);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
 
 app.post("/api/login", async (req, res) => {
   try {
@@ -312,11 +312,6 @@ app.put('/api/posts/:id', upload.single('image'), (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
-
-
-
-
-
 
 
 app.delete('/api/posts/:id', (req, res) => {
