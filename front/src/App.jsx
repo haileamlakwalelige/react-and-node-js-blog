@@ -10,6 +10,12 @@ import Footer from "./components/layout/Footer";
 import ProtectedRoute from "./ProtectedRoute";
 import { Navigate } from "react-router-dom";
 import Cookies from "js-cookie";
+import Technologies from "./pages/category pages/Technologies";
+import Leadership from "./pages/category pages/Leadership";
+import Productivity from "./pages/category pages/Productivity";
+import Creativity from "./pages/category pages/Creativity";
+import Growth from "./pages/category pages/Growth";
+import Edit from "./pages/Edit";
 
 const AppLayout = () => {
   const location = useLocation();
@@ -47,6 +53,12 @@ const AppLayout = () => {
           />
           <Route path="/register" element={<Register />} />
           <Route path="/posts/:id" element={<Single />} />
+          <Route path="/post/edit/:id" element={<Edit />} />
+          <Route path="/technology" element={<Technologies />} />
+          <Route path="/leadership" element={<Leadership />} />
+          <Route path="/productivity" element={<Productivity />} />
+          <Route path="/creativity" element={<Creativity />} />
+          <Route path="/growth" element={<Growth />} />
         </Routes>
       </div>
       <div className={`${isLogin ? "hidden" : "flex"}`}>
