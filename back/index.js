@@ -123,14 +123,32 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+
 app.delete('/api/users/:id', (req, res) => {
-  const postId = req.params.id;
-  const query = "DELETE FROM users WHERE `id` = ?"
-  db.query(query, [postId], (err, data) => {
-    if (err) return res.status(500).json({ message: "Error deleting your user!" });
-    return res.status(201).json({ message: "User deleted successfully!" });
-  })
-})
+  const userId = req.params.id;
+  const token = req.headers.authorization?.split(" ")[1]; // Extract token from the Authorization header
+
+  if (!token) {
+    return res.status(401).json({ message: "Unauthorized!" });
+  }
+
+  jwt.verify(token, "personal_blog_app_by_haileopia", (err, decoded) => {
+    if (err) {
+      return res.status(403).json({ message: "Invalid token!" });
+    }
+
+    if (decoded.id !== parseInt(userId)) {
+      return res.status(403).json({ message: "You can only delete your own account!" });
+    }
+
+    const query = "DELETE FROM users WHERE `id` = ?";
+    db.query(query, [userId], (err, data) => {
+      if (err) return res.status(500).json({ message: "Error deleting your user!" });
+      return res.status(200).json({ message: "User deleted successfully!" });
+    });
+  });
+});
+
 
 
 // post sections
@@ -153,35 +171,48 @@ app.get('/api/posts/:id', (req, res) => {
   })
 })
 
-// Handle creating posts with an image file upload
+
 app.post('/api/posts', upload.single('image'), (req, res) => {
   try {
-    const { title, category, type, date, description } = req.body;
-    const image = req.file ? req.file.filename : null; // Get the image filename
+    const token = req.headers.authorization?.split(" ")[1]; // Extract token
 
-    // Validate input fields
-    if (!title || !category || !type || !image || !date || !description) {
-      return res.status(400).json({ error: "All fields are required!" });
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized!" });
     }
 
-    const q = "INSERT INTO posts (`title`, `category`, `type`, `image`, `date`, `description`) VALUES (?, ?, ?, ?, ?, ?)";
-    const values = [title, category, type, image, date, description];
-
-    db.query(q, values, (err, result) => {
+    jwt.verify(token, "personal_blog_app_by_haileopia", (err, decoded) => {
       if (err) {
-        console.error("Database Error:", err.message);
-        return res.status(500).json({ error: "Error posting your content, please try again later!" });
+        return res.status(403).json({ error: "Invalid token!" });
       }
 
-      const insertedId = result.insertId;
-      const fetchQuery = "SELECT * FROM posts WHERE id = ?";
+      const userId = decoded.id; // Extract user ID from token
+      const { title, category, type, date, description } = req.body;
+      const image = req.file ? req.file.filename : null; // Get the image filename
 
-      db.query(fetchQuery, [insertedId], (err, data) => {
+      // Validate input fields
+      if (!title || !category || !type || !image || !date || !description) {
+        return res.status(400).json({ error: "All fields are required!" });
+      }
+
+      const q = "INSERT INTO posts (`user_id`, `title`, `category`, `type`, `image`, `date`, `description`) VALUES (?, ?, ?, ?, ?, ?, ?)";
+      const values = [userId, title, category, type, image, date, description];
+
+      db.query(q, values, (err, result) => {
         if (err) {
-          console.error("Database Fetch Error:", err.message);
-          return res.status(500).json({ error: "Error retrieving the created post!" });
+          console.error("Database Error:", err.message);
+          return res.status(500).json({ error: "Error posting your content, please try again later!" });
         }
-        return res.status(201).json({ message: "Your post was created successfully!", post: data[0] });
+
+        const insertedId = result.insertId;
+        const fetchQuery = "SELECT * FROM posts WHERE id = ?";
+
+        db.query(fetchQuery, [insertedId], (err, data) => {
+          if (err) {
+            console.error("Database Fetch Error:", err.message);
+            return res.status(500).json({ error: "Error retrieving the created post!" });
+          }
+          return res.status(201).json({ message: "Your post was created successfully!", post: data[0] });
+        });
       });
     });
   } catch (error) {
@@ -190,86 +221,161 @@ app.post('/api/posts', upload.single('image'), (req, res) => {
   }
 });
 
-// Handle updating a post
+
+
+
 app.put('/api/posts/:id', upload.single('image'), (req, res) => {
-  const postId = req.params.id;
-  const updates = req.body;
-  const image = req.file ? req.file.filename : null;
+  try {
+    const token = req.headers.authorization?.split(" ")[1]; // Extract token
 
-  // Check if there are any fields to update
-  if (Object.keys(updates).length === 0 && !image) {
-    return res.status(400).json({ error: "No fields provided for update!" });
-  }
-
-  // Fetch the existing post
-  const fetchQuery = "SELECT * FROM posts WHERE id = ?";
-  db.query(fetchQuery, [postId], (err, data) => {
-    if (err) {
-      console.error("Database Fetch Error:", err.message);
-      return res.status(500).json({ error: "Error retrieving the existing post!" });
+    if (!token) {
+      return res.status(401).json({ error: "Unauthorized!" });
     }
 
-    if (data.length === 0) {
-      return res.status(404).json({ error: "Post not found" });
-    }
-
-    // Merge the new values with existing values
-    const existingPost = data[0];
-    const updatedPost = { ...existingPost, ...updates };
-    if (image) updatedPost.image = image; // Update image if a new one is uploaded
-
-    // Dynamically create the SQL query based on provided fields
-    const fields = Object.keys(updatedPost)
-      .filter(key => key !== "id") // Exclude the ID from updates
-      .map(key => `\`${key}\` = ?`)
-      .join(", ");
-
-    const updateQuery = `UPDATE posts SET ${fields} WHERE id = ?`;
-    const values = [...Object.values(updatedPost).filter((_, index) => index !== 0), postId]; // Exclude ID from values
-
-    // Execute the update query
-    db.query(updateQuery, values, (err, result) => {
+    jwt.verify(token, "personal_blog_app_by_haileopia", (err, decoded) => {
       if (err) {
-        console.error("Database Error:", err.message);
-        return res.status(500).json({ error: "Error updating the post" });
+        return res.status(403).json({ error: "Invalid token!" });
       }
 
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ error: "Post not found" });
+      const userId = decoded.id; // Extract user ID from token
+      const postId = req.params.id;
+      const updates = req.body;
+      const image = req.file ? req.file.filename : null;
+
+      if (Object.keys(updates).length === 0 && !image) {
+        return res.status(400).json({ error: "No fields provided for update!" });
       }
 
-      // Fetch and return the updated post
-      db.query(fetchQuery, [postId], (err, updatedData) => {
+      // Fetch the existing post
+      const fetchQuery = "SELECT * FROM posts WHERE id = ?";
+      db.query(fetchQuery, [postId], (err, data) => {
         if (err) {
           console.error("Database Fetch Error:", err.message);
-          return res.status(500).json({ error: "Error retrieving the updated post!" });
+          return res.status(500).json({ error: "Error retrieving the existing post!" });
         }
-        return res.status(200).json({ message: "Post updated successfully!", post: updatedData[0] });
+
+        if (data.length === 0) {
+          return res.status(404).json({ error: "Post not found" });
+        }
+
+        const existingPost = data[0];
+
+        // Check if the logged-in user is the owner of the post
+        if (existingPost.user_id !== userId) {
+          return res.status(403).json({ error: "Forbidden! You are not allowed to update this post." });
+        }
+
+        // Create a new object with only updated fields
+        const updatedFields = {};
+        Object.keys(updates).forEach((key) => {
+          if (updates[key] !== "") updatedFields[key] = updates[key];
+        });
+        if (image) updatedFields.image = image;
+
+        // Ensure there's something to update
+        if (Object.keys(updatedFields).length === 0) {
+          return res.status(400).json({ error: "No valid fields to update!" });
+        }
+
+        // Dynamically generate the SQL query
+        const fields = Object.keys(updatedFields)
+          .map((key) => `\`${key}\` = ?`)
+          .join(", ");
+        const values = [...Object.values(updatedFields), postId];
+
+        const updateQuery = `UPDATE posts SET ${fields} WHERE id = ?`;
+
+        // Execute the update query
+        db.query(updateQuery, values, (err, result) => {
+          if (err) {
+            console.error("Database Error:", err.message);
+            return res.status(500).json({ error: "Error updating the post" });
+          }
+
+          if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "Post not found" });
+          }
+
+          // Fetch and return the updated post
+          db.query(fetchQuery, [postId], (err, updatedData) => {
+            if (err) {
+              console.error("Database Fetch Error:", err.message);
+              return res.status(500).json({ error: "Error retrieving the updated post!" });
+            }
+            return res.status(200).json({ message: "Post updated successfully!", post: updatedData[0] });
+          });
+        });
       });
     });
-  });
+  } catch (error) {
+    console.error("Server Error:", error.message);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 });
 
 
 
 
-app.delete('/api/delete/:id', (req, res) => {
-  const postId = req.params.id;
-  const query = "DELETE FROM posts WHERE `id` = ?"; // Fixed the syntax
 
-  db.query(query, [postId], (err, result) => {
-    if (err) {
-      console.error("Database Error:", err.message);
-      return res.status(500).json({ message: "Error deleting your post!" });
+
+
+app.delete('/api/posts/:id', (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1]; // Extract token
+
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized!" });
     }
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: "Post not found!" });
-    }
+    jwt.verify(token, "personal_blog_app_by_haileopia", (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: "Invalid token!" });
+      }
 
-    return res.status(200).json({ message: "Post deleted successfully!" });
-  });
+      const userId = decoded.id; // Extract user ID from token
+      const postId = req.params.id;
+
+      // Fetch the existing post
+      const fetchQuery = "SELECT * FROM posts WHERE id = ?";
+      db.query(fetchQuery, [postId], (err, data) => {
+        if (err) {
+          console.error("Database Fetch Error:", err.message);
+          return res.status(500).json({ message: "Error retrieving the post!" });
+        }
+
+        if (data.length === 0) {
+          return res.status(404).json({ message: "Post not found!" });
+        }
+
+        const existingPost = data[0];
+
+        // Check if the logged-in user is the owner of the post
+        if (existingPost.user_id !== userId) {
+          return res.status(403).json({ message: "Forbidden! You are not allowed to delete this post." });
+        }
+
+        // Delete the post if the user is authorized
+        const deleteQuery = "DELETE FROM posts WHERE id = ?";
+        db.query(deleteQuery, [postId], (err, result) => {
+          if (err) {
+            console.error("Database Error:", err.message);
+            return res.status(500).json({ message: "Error deleting your post!" });
+          }
+
+          if (result.affectedRows === 0) {
+            return res.status(404).json({ message: "Post not found!" });
+          }
+
+          return res.status(200).json({ message: "Post deleted successfully!" });
+        });
+      });
+    });
+  } catch (error) {
+    console.error("Server Error:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 });
+
 
 
 // Start the server
