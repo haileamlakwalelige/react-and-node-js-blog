@@ -13,7 +13,7 @@ const Footer = () => {
             <h2 className="text-2xl font-bold text-white mb-4">
               Haileopia Blog
             </h2>
-            <div className="flex justify-center md:justify-start space-x-6">
+            <div className="flex flex-col gap-4 items-start md:flex-row overflow-x-auto whitespace-nowrap space-x-6 px-4 py-2 scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900">
               <Link
                 to="/"
                 className="text-white hover:text-indigo-600 transition-all duration-300"
@@ -21,22 +21,34 @@ const Footer = () => {
                 Home
               </Link>
               <Link
-                to="/about"
+                to="/technology"
                 className="text-white hover:text-indigo-600 transition-all duration-300"
               >
-                About
+                Technology
               </Link>
               <Link
-                to="/contact"
+                to="/leadership"
                 className="text-white hover:text-indigo-600 transition-all duration-300"
               >
-                Contact
+                Leadership
               </Link>
               <Link
-                to="/privacy"
+                to="/productivity"
                 className="text-white hover:text-indigo-600 transition-all duration-300"
               >
-                Privacy
+                Productivity
+              </Link>
+              <Link
+                to="/creativity"
+                className="text-white hover:text-indigo-600 transition-all duration-300"
+              >
+                Creativity
+              </Link>
+              <Link
+                to="/growth"
+                className="text-white hover:text-indigo-600 transition-all duration-300"
+              >
+                Growth
               </Link>
             </div>
           </div>
